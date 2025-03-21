@@ -5,27 +5,39 @@ import { IonReactRouter } from "@ionic/react-router";
 import Login from "./pages/Login";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Register from "./pages/Register";
+import React from "react";
+import Home from "./pages/Home";
 
-const PrivateRoute = ({ component: Component, ...rest }: any) => {
+const App = () => {
   const { user } = useAuth();
+
+
   return (
-    <Route {...rest} render={(props) => (user ? <Component {...props} /> : <Redirect to="/login" />)} />
+    <AuthProvider>
+      <IonApp>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            {user ? (
+              <>
+                <Route path="/home" component={Home} exact />
+                <Route path="/">
+                  <Redirect to="/home" />
+                </Route>
+              </>
+            ) : (
+              <>
+                <Route path="/login" component={Login} exact />
+                <Route path="/signup" component={Register} exact />
+                <Route path="/">
+                  <Redirect to="/login" />
+                </Route>
+              </>
+            )}
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </IonApp>
+    </AuthProvider>
   );
 };
-  
-const App = () => (
-  <AuthProvider>
-    <IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route path="/login" component={Login} exact />
-          <Route path="/signup" component={Register} exact />
-          <PrivateRoute path="/" component={() => <h1>Home Page</h1>} exact />
-          <Redirect from="*" to="/" />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </IonApp>
-  </AuthProvider>
-);
 
 export default App;
