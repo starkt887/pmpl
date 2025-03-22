@@ -17,6 +17,7 @@ import {
   DocumentData,
   getDocs,
   query,
+  Timestamp,
   where,
 } from "firebase/firestore";
 import {
@@ -32,6 +33,9 @@ import { fireStore } from "../services/firebaseClient";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { addCities } from "../features/cities/citiesSlice";
 import PaymentDetails, { PaymentType } from "../components/PaymentDetails";
+import { DateTime } from "../utils/luxon";
+
+
 
 export interface IBusData {
   baseFare: number;
@@ -48,6 +52,7 @@ export interface IBusData {
     name: string;
   }[];
   totalDistance: number;
+  time:Timestamp
 }
 const BuyTickets = () => {
   const history = useHistory();
@@ -254,7 +259,7 @@ const BuyTickets = () => {
                     <h3>
                       {busData.startLocation} - {busData.endLocation}
                     </h3>
-                    9:00 pm
+                   {`${DateTime.now().toFormat('MMMM dd, yyyy hh:mm')}`}
                   </IonLabel>
                   <IonIcon
                     slot="end"

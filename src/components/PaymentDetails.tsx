@@ -27,7 +27,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { IBusData } from "../pages/BuyTickets";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
-import Razorpay from "razorpay";
+import useToast from "../hooks/useToast.hook";
+import { useAppSelector } from "../app/hooks";
 
 export type PaymentType = {
   isOpen?: boolean;
@@ -46,7 +47,9 @@ const PaymentDetails = ({
 }: PaymentType) => {
   const [Cost, setCost] = useState<number>();
 
-  const { error, isLoading, Razorpay:rzpay } = useRazorpay();
+  const { error, isLoading, Razorpay: rzpay } = useRazorpay();
+  const { presentToast } = useToast();
+  const uid = useAppSelector((state) => state.AuthenticationState.uid);
 
   const getCost = () => {
     if (busData) {
@@ -66,45 +69,89 @@ const PaymentDetails = ({
       return finalCost;
     }
   };
-  const handlePayment = async() => {
-    var instance = new Razorpay({
-      key_id: "rzp_test_NxAV4QBfEPwxiL",
-      key_secret: "GeHc4198s9VWQFxjQcQpm3SD",
-    });
+  const handlePayment = async () => {
+    if (Cost) {
+      const response = await fetch(
+        "https://pmplbackend.vercel.app/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amount: Cost, currency: "INR" }),
+        }
+      );
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
 
-   const response= await instance.orders.create({
-      amount: 5000,
-      currency: "INR",
-      receipt: "receipt#1",
-      notes: {
-        key1: "value3",
-        key2: "value2",
-      },
-    });
+        const options: RazorpayOrderOptions = {
+          key: "rzp_test_NxAV4QBfEPwxiL",
+          amount: Cost, // Amount in paise
+          currency: "INR",
+          name: "Test Company",
+          description: "Test Transaction",
+          order_id: responseData.orderId, // Generate order_id on server
+          handler: async (response) => {
+            console.log(response);
+            const verificationPayload = {
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+            };
+            try {
+              const verifyResponse = await fetch(
+                "https://pmplbackend.vercel.app/verify-payment",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(verificationPayload),
+                }
+              );
 
-    const options: RazorpayOrderOptions = {
-      key: "rzp_test_NxAV4QBfEPwxiL",
-      amount: 5000, // Amount in paise
-      currency: "INR",
-      name: "Test Company",
-      description: "Test Transaction",
-      order_id: response.id, // Generate order_id on server
-      handler: (response) => {
-        console.log(response);
-        alert("Payment Successful!");
-      },
-      prefill: {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        contact: "9999999999",
-      },
-      theme: {
-        color: "#F37254",
-      },
-    };
+              const verifyData = await verifyResponse.json();
 
-    const razorpayInstance = new rzpay(options);
-    razorpayInstance.open();
+              if (verifyData.success) {
+                alert("Payment Successful!");
+                const ticketCollectionPayload = {
+                  id: uid,
+                  source,
+                  destination,
+                  cost: Cost,
+                  ...verificationPayload,
+                };
+                presentToast("Ticket Purchase success!", "success");
+                if (setIsOpen) setIsOpen(false);
+              } else {
+                throw new Error("Payment verification failed!");
+              }
+            } catch (error) {
+              console.error("Payment error:", error);
+              alert("Payment failed! Please try again.");
+              presentToast("Payment failed! Please try again.", "danger");
+            }
+          },
+          prefill: {
+            name: "John Doe",
+            email: "john.doe@example.com",
+            contact: "9999999999",
+          },
+          theme: {
+            color: "#F37254",
+          },
+        };
+
+        const razorpayInstance = new rzpay(options);
+        razorpayInstance.open();
+      }
+    }
+  };
+
+  const pushTicketDetails = () => {
+    console.log("add ticket");
+    
   };
   return (
     <IonModal isOpen={isOpen} onDidPresent={getCost}>
