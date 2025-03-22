@@ -1,42 +1,49 @@
-import { Redirect, Route } from "react-router-dom";
+import { Redirect, Route, useHistory } from "react-router-dom";
 import { IonApp, IonRouterOutlet } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 
 import Login from "./pages/Login";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import Register from "./pages/Register";
-import React from "react";
+
+import React, { useEffect } from "react";
 import Home from "./pages/Home";
+import { useAppDispatch, useAppSelector } from "./app/hooks";
+import BuyTickets from "./pages/BuyTickets";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./services/firebaseClient";
+import { loginSuccess } from "./features/authentication/authenticationSlice";
 
 const App = () => {
-  const { user } = useAuth();
-
+  const isLoggedin = useAppSelector(
+    (state) => state.AuthenticationState.isLoggedin
+  );
+ 
 
   return (
-    <AuthProvider>
-      <IonApp>
-        <IonReactRouter>
-          <IonRouterOutlet>
-            {user ? (
-              <>
-                <Route path="/home" component={Home} exact />
-                <Route path="/">
-                  <Redirect to="/home" />
-                </Route>
-              </>
-            ) : (
-              <>
-                <Route path="/login" component={Login} exact />
-                <Route path="/signup" component={Register} exact />
-                <Route path="/">
-                  <Redirect to="/login" />
-                </Route>
-              </>
-            )}
-          </IonRouterOutlet>
-        </IonReactRouter>
-      </IonApp>
-    </AuthProvider>
+    <IonApp>
+      <IonReactRouter>
+        <IonRouterOutlet>
+          {isLoggedin ? (
+            <>
+              <Route path="/home" component={Home} exact />
+              <Route path="/buytickets" component={BuyTickets} exact />
+              <Route path="/login">
+                <Redirect to="/home" />
+              </Route>
+              <Route path="/">
+                <Redirect to="/home" />
+              </Route>
+            </>
+          ) : (
+            <>
+              <Route path="/login" component={Login} exact />
+              <Route path="/">
+                <Redirect to="/login" />
+              </Route>
+            </>
+          )}
+        </IonRouterOutlet>
+      </IonReactRouter>
+    </IonApp>
   );
 };
 

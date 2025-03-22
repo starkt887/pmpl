@@ -1,0 +1,17 @@
+.login{
+    padding:0
+    }
+    .login .content{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        justify-content: center;
+        height: 100%;
+    }
+    .login .content .loginButtonPanel{
+        display: flex;
+    }
+    .login .content .loginButtonPanel .btnlogin{
+        flex-grow: 1;
+    }
+    
