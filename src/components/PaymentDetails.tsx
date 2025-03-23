@@ -29,6 +29,8 @@ import { IBusData } from "../pages/BuyTickets";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import useToast from "../hooks/useToast.hook";
 import { useAppSelector } from "../app/hooks";
+import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { fireStore } from "../services/firebaseClient";
 
 export type PaymentType = {
   isOpen?: boolean;
@@ -37,6 +39,17 @@ export type PaymentType = {
   source: string;
   destination: string;
 };
+
+export interface ITicket {
+  id: string;
+  source: string;
+  destination: string;
+  cost: number;
+  paymentId: string;
+  orderId: string;
+  signature: string;
+  timestamp: Timestamp;
+}
 
 const PaymentDetails = ({
   isOpen,
@@ -89,8 +102,8 @@ const PaymentDetails = ({
           key: "rzp_test_NxAV4QBfEPwxiL",
           amount: Cost, // Amount in paise
           currency: "INR",
-          name: "Test Company",
-          description: "Test Transaction",
+          name: "PMPL Bookings",
+          description: "Ticket/Pass Booking",
           order_id: responseData.orderId, // Generate order_id on server
           handler: async (response) => {
             console.log(response);
@@ -114,22 +127,24 @@ const PaymentDetails = ({
               const verifyData = await verifyResponse.json();
 
               if (verifyData.success) {
-                alert("Payment Successful!");
-                const ticketCollectionPayload = {
+                // alert("Payment Successful!");
+                const ticketCollectionPayload: ITicket = {
                   id: uid,
                   source,
                   destination,
                   cost: Cost,
+                  timestamp: (busData && busData.timestamp) || Timestamp.now(),
                   ...verificationPayload,
                 };
                 presentToast("Ticket Purchase success!", "success");
+                pushTicketDetails(ticketCollectionPayload);
                 if (setIsOpen) setIsOpen(false);
               } else {
                 throw new Error("Payment verification failed!");
               }
             } catch (error) {
               console.error("Payment error:", error);
-              alert("Payment failed! Please try again.");
+              // alert("Payment failed! Please try again.");
               presentToast("Payment failed! Please try again.", "danger");
             }
           },
@@ -149,10 +164,16 @@ const PaymentDetails = ({
     }
   };
 
-  const pushTicketDetails = () => {
+  const pushTicketDetails = async (ticketCollectionPayload: ITicket) => {
     console.log("add ticket");
-    
+    try {
+      await addDoc(collection(fireStore, "tickets"), ticketCollectionPayload);
+      console.log("Added the tickets!");
+    } catch (error) {
+      console.log("Add tickets error:", error);
+    }
   };
+
   return (
     <IonModal isOpen={isOpen} onDidPresent={getCost}>
       <IonHeader>

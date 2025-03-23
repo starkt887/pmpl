@@ -34,8 +34,7 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { addCities } from "../features/cities/citiesSlice";
 import PaymentDetails, { PaymentType } from "../components/PaymentDetails";
 import { DateTime } from "../utils/luxon";
-
-
+import { updateRoutesWithTimestamp } from "../utils/setupDb";
 
 export interface IBusData {
   baseFare: number;
@@ -52,7 +51,7 @@ export interface IBusData {
     name: string;
   }[];
   totalDistance: number;
-  time:Timestamp
+  timestamp: Timestamp;
 }
 const BuyTickets = () => {
   const history = useHistory();
@@ -147,7 +146,8 @@ const BuyTickets = () => {
     const q1 = query(
       collection(fireStore, "routes"),
       where("startLocation", "==", source),
-      where("endLocation", "==", destination)
+      where("endLocation", "==", destination),
+      // where("timestamp", ">", Timestamp.now())
     );
 
     const routesPrimary = (await getDocs(q1)).docs.map((route) => {
@@ -158,7 +158,8 @@ const BuyTickets = () => {
     const q2 = query(
       collection(fireStore, "routes"),
       where("startLocation", "==", source),
-      where("stopNames", "array-contains", destination)
+      where("stopNames", "array-contains", destination),
+      // where("timestamp", ">", Timestamp.now())
     );
 
     const routesSecondary = (await getDocs(q2)).docs.map((route) => {
@@ -169,7 +170,8 @@ const BuyTickets = () => {
     const q3 = query(
       collection(fireStore, "routes"),
       where("stopNames", "array-contains", source),
-      where("endLocation", "==", destination)
+      where("endLocation", "==", destination),
+      // where("timestamp", ">", Timestamp.now())
     );
 
     const routesTertiary = (await getDocs(q3)).docs.map((route) => {
@@ -206,6 +208,7 @@ const BuyTickets = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent class="ion-padding">
+        {/* <IonButton onClick={updateRoutesWithTimestamp}>Update Routes Timestamp</IonButton> */}
         <IonLabel>
           <p>Select source:</p>
         </IonLabel>
@@ -259,7 +262,7 @@ const BuyTickets = () => {
                     <h3>
                       {busData.startLocation} - {busData.endLocation}
                     </h3>
-                   {`${DateTime.now().toFormat('MMMM dd, yyyy hh:mm')}`}
+                    {`${DateTime.fromJSDate(busData.timestamp.toDate()).toFormat("MMMM dd, yyyy hh:mm")}`}
                   </IonLabel>
                   <IonIcon
                     slot="end"
@@ -274,7 +277,7 @@ const BuyTickets = () => {
         <PaymentDetails
           isOpen={isOpen}
           setIsOpen={setIsOpen}
-          busData={paymentDetails?.busData||undefined}
+          busData={paymentDetails?.busData || undefined}
           destination={paymentDetails?.destination || ""}
           source={paymentDetails?.source || ""}
         />

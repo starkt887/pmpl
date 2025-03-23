@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   IonPage,
   IonHeader,
@@ -13,6 +13,8 @@ import {
   IonLabel,
   IonText,
   IonButtons,
+  IonList,
+  IonItem,
 } from "@ionic/react";
 import {
   ticketOutline,
@@ -21,10 +23,31 @@ import {
   trainOutline,
   atCircleSharp,
   person,
+  bus,
 } from "ionicons/icons";
 import "./Home.css";
+import { useHistory } from "react-router";
+import useData from "../hooks/useData.hook";
+import { ITicket } from "../components/PaymentDetails";
+import { IDailyPass } from "./DailyPass";
+import { DateTime } from "../utils/luxon";
 
 const Home: React.FC = () => {
+  const history = useHistory();
+  const { getRecentPasses, getRecentTickets } = useData();
+  const [recentTickets, setrecentTickets] = useState<ITicket[]>();
+  const [recentPasses, setrecentPasses] = useState<IDailyPass[]>();
+
+  const getRecentData = async () => {
+    const tickets = await getRecentTickets();
+    setrecentTickets(tickets);
+    const passes = await getRecentPasses();
+    setrecentPasses(passes);
+  };
+
+  useEffect(() => {
+    getRecentData();
+  }, []);
   return (
     <IonPage>
       <IonHeader>
@@ -40,7 +63,12 @@ const Home: React.FC = () => {
             {/* <IonButton slot="icon-only" fill="solid">
               <IonIcon icon={person} />
             </IonButton> */}
-            <IonButton slot="icon-only" fill="solid">
+            <IonButton
+              slot="icon-only"
+              fill="solid"
+              routerLink="/profile"
+              routerDirection="forward"
+            >
               <IonIcon icon={person} />
             </IonButton>
           </IonButtons>
@@ -48,18 +76,29 @@ const Home: React.FC = () => {
       </IonHeader>
 
       <IonContent>
-        <IonSearchbar placeholder="Where to?" />
+        <IonSearchbar
+          placeholder="Where to?"
+          onClick={() => history.push("/buytickets")}
+        />
 
         <IonGrid>
           <IonRow className="ticket-options">
             <IonCol>
-              <IonButton fill="solid" routerLink="/buytickets" routerDirection="forward">
+              <IonButton
+                fill="solid"
+                routerLink="/buytickets"
+                routerDirection="forward"
+              >
                 <IonIcon icon={ticketOutline} size="large" />
                 <IonLabel>Bus Ticket</IonLabel>
               </IonButton>
             </IonCol>
             <IonCol>
-              <IonButton fill="solid">
+              <IonButton
+                fill="solid"
+                routerLink="/dailypass"
+                routerDirection="forward"
+              >
                 <IonIcon icon={calendarOutline} size="large" />
                 <IonLabel>Daily Pass</IonLabel>
               </IonButton>
@@ -67,24 +106,34 @@ const Home: React.FC = () => {
           </IonRow>
 
           <IonRow className="additional-options">
-            <IonCol>
-              <IonButton fill="solid">
+            <IonCol size="4">
+              <IonButton
+                fill="solid"
+                routerLink="/viewtickets"
+                routerDirection="forward"
+                expand="block"
+              >
                 <IonIcon icon={ticketOutline} size="large" />
               </IonButton>
             </IonCol>
-            <IonCol>
-              <IonButton fill="solid">
-                <IonIcon icon={ticketOutline} size="large" />
+            <IonCol size="4">
+              <IonButton
+                fill="solid"
+                routerLink="/viewpass"
+                routerDirection="forward"
+                expand="block"
+              >
+                <IonIcon icon={calendarOutline} size="large" />
               </IonButton>
             </IonCol>
-            <IonCol>
-              <IonButton fill="solid">
+            <IonCol size="4">
+              <IonButton
+                fill="solid"
+                routerLink="/allroutes"
+                routerDirection="forward"
+                expand="block"
+              >
                 <IonIcon icon={mapOutline} size="large" />
-              </IonButton>
-            </IonCol>
-            <IonCol>
-              <IonButton fill="solid">
-                <IonIcon icon={trainOutline} size="large" />
               </IonButton>
             </IonCol>
           </IonRow>
@@ -98,38 +147,72 @@ const Home: React.FC = () => {
             <IonCol>
               <IonLabel>Route Timetable</IonLabel>
             </IonCol>
-            <IonCol>
-              <IonLabel>Metro Ticket</IonLabel>
-            </IonCol>
           </IonRow>
           <IonRow className="near-me-section">
             <IonCol>
               <IonText>
-                <h3>Near Me</h3>
-              </IonText>
-            </IonCol>
-            <IonCol>
-              <IonText className="ion-text-end">
-                <h4>show all</h4>
+                <h3>Recent Tickets</h3>
               </IonText>
             </IonCol>
           </IonRow>
+          <IonList>
+            {recentTickets &&
+              recentTickets.map((ticket, id) => {
+                return (
+                  <IonItem key={id}>
+                    <IonIcon
+                      size="large"
+                      src={bus}
+                      className="ion-padding-end"
+                    />
+
+                    <IonLabel>
+                      <h3>
+                        {ticket.source} - {ticket.destination}
+                      </h3>
+                      {`${DateTime.fromJSDate(
+                        ticket.timestamp.toDate()
+                      ).toFormat("MMMM dd, yyyy hh:mm")}`}
+                    </IonLabel>
+                    <IonLabel slot="end">
+                      <h4>₹ {ticket.cost}</h4>
+                    </IonLabel>
+                  </IonItem>
+                );
+              })}
+          </IonList>
+
           <IonRow className="near-me-section">
             <IonCol>
-              <IonText color="medium">Bus Stop</IonText>
-            </IonCol>
-            <IonCol>
-              <IonText color="medium" className="ion-text-end">
-                449m
+              <IonText>
+                <h3>Recent Passes</h3>
               </IonText>
             </IonCol>
           </IonRow>
-          <IonText>No upcoming buses at this stop.</IonText>
-          <IonRow className="nearby-map">
-            <IonCol size="12">
-              <div className="map-placeholder">Map Placeholder</div>
-            </IonCol>
-          </IonRow>
+          <IonList>
+            {recentPasses &&
+              recentPasses.map((pass, id) => {
+                return (
+                  <IonItem key={id}>
+                    <IonIcon
+                      size="large"
+                      src={bus}
+                      className="ion-padding-end"
+                    />
+
+                    <IonLabel>
+                      <h3>{pass.type}</h3>
+                      {`${DateTime.fromJSDate(
+                        pass.timestamp.toDate()
+                      ).toFormat("MMMM dd, yyyy hh:mm")}`}
+                    </IonLabel>
+                    <IonLabel slot="end">
+                      <h4>₹ {pass.cost}</h4>
+                    </IonLabel>
+                  </IonItem>
+                );
+              })}
+          </IonList>
         </IonGrid>
       </IonContent>
     </IonPage>

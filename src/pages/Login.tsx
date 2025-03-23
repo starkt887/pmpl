@@ -39,7 +39,7 @@ const Login = () => {
   const history = useHistory();
 
   const [isRegistrationModalOpen, setisRegistrationModalOpen] = useState(false);
-  const isLoading = useAppSelector((state) => state.LoaderState.loading);
+  const isLoading = useAppSelector(state => state.LoaderState.loading);
   const { presentToast } = useToast();
     const isLoggedin = useAppSelector(
       (state) => state.AuthenticationState.isLoggedin
