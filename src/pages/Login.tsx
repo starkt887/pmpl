@@ -10,6 +10,12 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import React from "react";
 import { useHistory } from "react-router";
+import {
+  addBusesToFirestore,
+  addCitiesToFirestore,
+  addRoutesToFirestore,
+  updateRoutesFormat,
+} from "../utils/setupDb";
 
 const Login = () => {
   const { login } = useAuth();
@@ -22,7 +28,7 @@ const Login = () => {
     try {
       await login(email, password);
       setMessage("Login successful!");
-      history.replace("/")
+      history.replace("/");
     } catch (error: any) {
       setMessage(error.message);
     }
@@ -57,6 +63,10 @@ const Login = () => {
           duration={2000}
           onDidDismiss={() => setMessage("")}
         />
+        <IonButton onClick={addBusesToFirestore}>Add buses</IonButton>
+        <IonButton onClick={addRoutesToFirestore}>Add routes</IonButton>
+        <IonButton onClick={addCitiesToFirestore}>Add Cities</IonButton>
+        <IonButton onClick={updateRoutesFormat}>Update cities</IonButton>
       </IonContent>
     </IonPage>
   );
