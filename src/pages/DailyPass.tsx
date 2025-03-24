@@ -167,10 +167,32 @@ const DailyPass = () => {
     try {
       await addDoc(collection(fireStore, "dailypasses"), passCollectionPayload);
       console.log("Added the tickets!");
-      setPassDetails("")
-      
+      setPassDetails("");
     } catch (error) {
       console.log("Add tickets error:", error);
+    }
+  };
+
+  const pushPassDetails2 = async () => {
+    console.log("add ticket");
+    try {
+      const passCollectionPayload: IDailyPass = {
+        id: uid,
+        type: (selectedPass && selectedPass) || "",
+        cost: Cost || 0,
+        timestamp: Timestamp.now(),
+        orderId: "test_order_id",
+        paymentId: "test_payment_id",
+        signature: "test_signature",
+      };
+
+      await addDoc(collection(fireStore, "dailypasses"), passCollectionPayload);
+      console.log("Added the tickets!");
+      setPassDetails("");
+      presentToast("Daily Pass Purchase success!", "success");
+    } catch (error) {
+      console.log("Add tickets error:", error);
+      presentToast("Payment failed! Please try again.", "danger");
     }
   };
 

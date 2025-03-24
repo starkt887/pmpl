@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.ajskland.pmpl;
 
 import com.getcapacitor.BridgeActivity;
 

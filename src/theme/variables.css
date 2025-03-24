@@ -234,3 +234,8 @@ http://ionicframework.com/docs/theming/ */
     --ion-card-background: #1e1e1e;
   }
 }
+
+
+ion-header {
+  padding-top: 20px; /* Adjust based on the status bar height */
+}

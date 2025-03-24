@@ -47,7 +47,6 @@ const RegistrationModal = ({ isOpen, setIsOpen }: RegisterProps) => {
       Email,
       Password,
       ConfirmPassword,
-      UnloackPhrase,
     ].every((input) => input !== "");
     if (!isFilled) {
       presentToast("Please enter all fields!", "danger");

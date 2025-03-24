@@ -31,6 +31,7 @@ import {
 import Loader from "../components/Loader";
 import { loadingOff, loadingOn } from "../features/loader/loaderSlice";
 import useToast from "../hooks/useToast.hook";
+import logo from "../images/logo.png";
 
 const Login = () => {
   const [Email, setEmail] = useState<string>();
@@ -39,11 +40,11 @@ const Login = () => {
   const history = useHistory();
 
   const [isRegistrationModalOpen, setisRegistrationModalOpen] = useState(false);
-  const isLoading = useAppSelector(state => state.LoaderState.loading);
+  const isLoading = useAppSelector((state) => state.LoaderState.loading);
   const { presentToast } = useToast();
-    const isLoggedin = useAppSelector(
-      (state) => state.AuthenticationState.isLoggedin
-    );
+  const isLoggedin = useAppSelector(
+    (state) => state.AuthenticationState.isLoggedin
+  );
 
   onAuthStateChanged(auth, (user) => {
     console.log(user?.uid);
@@ -63,7 +64,7 @@ const Login = () => {
       history.replace("/home");
     }
   }, [isLoggedin]);
-  
+
   const handleLogin = () => {
     if (Email && Password) {
       dispatch(loadingOn());
@@ -111,52 +112,60 @@ const Login = () => {
           isOpen={isRegistrationModalOpen}
           setIsOpen={setisRegistrationModalOpen}
         />
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <div className="content">
-            <IonList lines="none">
-              <IonItem className="ion-margin-bottom">
-                {" "}
-                <IonInput
-                  label="Email"
-                  labelPlacement="floating"
-                  placeholder="Email"
-                  type="email"
-                  onIonChange={(e) => setEmail(e.detail.value!)}
-                />
-              </IonItem>
-              <IonItem className="ion-margin-bottom">
-                {" "}
-                <IonInput
-                  label="Password"
-                  labelPlacement="floating"
-                  placeholder="Password"
-                  type="password"
-                  onIonChange={(e) => setPassword(e.detail.value!)}
-                >
-                  {" "}
-                </IonInput>
-              </IonItem>
-
-              <IonButton
-                className="btnlogin"
-                expand="full"
-                onClick={handleLogin}
-              >
-                Login
-              </IonButton>
-
-              <IonButton
-                className="btnlogin"
-                expand="full"
-                onClick={() => setisRegistrationModalOpen(true)}
-              >
-                Register
-              </IonButton>
-            </IonList>
+        <div
+          style={{ display: "flex", flexDirection: "column", height: "100%" }}
+        >
+          <div style={{height:"50%",alignSelf:"center"}}>
+            <img src={logo} width={200} />
+            <h1 className="ion-text-center">Welcome to <br/> PMPL Booking</h1>
           </div>
-        )}
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <div className="content">
+              <IonList lines="none">
+                <IonItem className="ion-margin-bottom">
+                  {" "}
+                  <IonInput
+                    label="Email"
+                    labelPlacement="floating"
+                    placeholder="Email"
+                    type="email"
+                    onIonChange={(e) => setEmail(e.detail.value!)}
+                  />
+                </IonItem>
+                <IonItem className="ion-margin-bottom">
+                  {" "}
+                  <IonInput
+                    label="Password"
+                    labelPlacement="floating"
+                    placeholder="Password"
+                    type="password"
+                    onIonChange={(e) => setPassword(e.detail.value!)}
+                  >
+                    {" "}
+                  </IonInput>
+                </IonItem>
+
+                <IonButton
+                  className="btnlogin"
+                  expand="full"
+                  onClick={handleLogin}
+                >
+                  Login
+                </IonButton>
+
+                <IonButton
+                  className="btnlogin"
+                  expand="full"
+                  onClick={() => setisRegistrationModalOpen(true)}
+                >
+                  Register
+                </IonButton>
+              </IonList>
+            </div>
+          )}
+        </div>
       </IonContent>
     </IonPage>
   );

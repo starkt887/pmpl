@@ -174,6 +174,28 @@ const PaymentDetails = ({
     }
   };
 
+  const pushTicketDetails2 = async () => {
+    console.log("add ticket");
+    try {
+      const ticketCollectionPayload: ITicket = {
+        id: uid,
+        source,
+        destination,
+        cost: Cost || 0,
+        timestamp: (busData && busData.timestamp) || Timestamp.now(),
+        orderId: "test_order_id",
+        paymentId: "test_payment_id",
+        signature: "test_signature",
+      };
+      presentToast("Ticket Purchase success!", "success");
+      await addDoc(collection(fireStore, "tickets"), ticketCollectionPayload);
+      console.log("Added the tickets!");
+    } catch (error) {
+      console.log("Add tickets error:", error);
+      presentToast("Payment failed! Please try again.", "danger");
+    }
+  };
+
   return (
     <IonModal isOpen={isOpen} onDidPresent={getCost}>
       <IonHeader>
@@ -323,6 +345,7 @@ const PaymentDetails = ({
             expand="block"
             size="large"
             onClick={handlePayment}
+            // onClick={pushTicketDetails2}
           >
             Purchase Ticket (₹{Cost})
           </IonButton>
