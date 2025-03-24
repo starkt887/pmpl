@@ -215,7 +215,7 @@ const BuyTickets = () => {
         <IonSearchbar
           showClearButton="focus"
           placeholder="Enter source"
-          onIonInput={(e) => handleSourceChange(e.detail.value!)}
+          onIonInput={(e) => handleSourceChange(e.detail.value!.toLocaleLowerCase())}
           debounce={500}
           value={source}
         ></IonSearchbar>
@@ -230,7 +230,7 @@ const BuyTickets = () => {
         <IonSearchbar
           showClearButton="focus"
           placeholder="Enter destination"
-          onIonInput={(e) => handleDestinationChange(e.detail.value!)}
+          onIonInput={(e) => handleDestinationChange(e.detail.value!.toLocaleLowerCase())}
           debounce={500}
           value={destination}
         ></IonSearchbar>
