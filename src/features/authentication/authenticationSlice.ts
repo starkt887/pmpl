@@ -5,6 +5,7 @@ export interface IAuthenticationState {
   uid: string;
   email: string;
   name: string;
+  wallet: number;
 }
 
 const initialState: IAuthenticationState = {
@@ -12,6 +13,7 @@ const initialState: IAuthenticationState = {
   uid: "",
   email: "",
   name: "",
+  wallet: 0,
 };
 
 export const authenticationSlice = createSlice({
@@ -27,7 +29,11 @@ export const authenticationSlice = createSlice({
         uid: action.payload.uid,
         email: action.payload.email,
         name: action.payload.name,
+        wallet: action.payload.wallet,
       };
+    },
+    updateBalance: (state, action: PayloadAction<number>) => {
+      state.wallet = action.payload;
     },
     logout: (state) => {
       return initialState;
@@ -35,5 +41,5 @@ export const authenticationSlice = createSlice({
   },
 });
 
-export const { loginSuccess, logout } = authenticationSlice.actions;
+export const { loginSuccess,updateBalance, logout } = authenticationSlice.actions;
 export default authenticationSlice.reducer;

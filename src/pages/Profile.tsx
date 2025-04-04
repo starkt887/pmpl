@@ -26,6 +26,7 @@ import { chevronBack } from "ionicons/icons";
 import { useHistory } from "react-router";
 import useToast from "../hooks/useToast.hook";
 import React from "react";
+import WalletModal from "../components/WalletModal";
 
 const Profile = () => {
   const user = auth.currentUser;
@@ -36,6 +37,7 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState<string>("");
   const { presentToast } = useToast();
   const history = useHistory();
+  const [isWalletOpen, setisWalletOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -165,6 +167,21 @@ const Profile = () => {
         >
           Change Password
         </IonButton>
+
+        {/* wallet manage */}
+        <WalletModal
+          initialBalance={0}
+          isOpen={isWalletOpen}
+          onClose={() => setisWalletOpen(false)}
+        />
+        <IonButton
+          expand="full"
+          color="warning"
+          onClick={() => setisWalletOpen(true)}
+        >
+          Wallet
+        </IonButton>
+
         <IonButton expand="full" color="danger" onClick={handleLogout}>
           Logout
         </IonButton>

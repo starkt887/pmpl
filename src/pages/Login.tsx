@@ -46,16 +46,19 @@ const Login = () => {
     (state) => state.AuthenticationState.isLoggedin
   );
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     console.log(user?.uid);
     if (user) {
+      const docSnap = await getDoc(doc(fireStore, "users", user.uid));
       dispatch(
         loginSuccess({
           email: user.email!,
           name: user.displayName!,
           uid: user.uid,
+          wallet: docSnap.get("wallet"),
         })
       );
+
       console.log("loggin in");
     }
   });
@@ -81,6 +84,7 @@ const Login = () => {
                 email: docSnap.get("email"),
                 name: docSnap.get("name"),
                 uid: user.uid,
+                wallet: docSnap.get("wallet"),
               })
             );
             console.log("saving up", docSnap.get("unlock_phrase"));
@@ -115,9 +119,11 @@ const Login = () => {
         <div
           style={{ display: "flex", flexDirection: "column", height: "100%" }}
         >
-          <div style={{height:"50%",alignSelf:"center"}}>
+          <div style={{ height: "50%", alignSelf: "center" }}>
             <img src={logo} width={200} />
-            <h1 className="ion-text-center">Welcome to <br/> PMPL Booking</h1>
+            <h1 className="ion-text-center">
+              Welcome to <br /> PMPL Booking
+            </h1>
           </div>
           {isLoading ? (
             <Loader />

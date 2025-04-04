@@ -20,10 +20,12 @@ import {
 import {
   addDoc,
   collection,
+  doc,
   DocumentData,
   getDocs,
   query,
   Timestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import {
@@ -31,10 +33,12 @@ import {
   arrowUp,
   bus,
   calendarOutline,
+  cardOutline,
   chevronBack,
   chevronForward,
   ellipsisVerticalOutline,
   search,
+  walletOutline,
 } from "ionicons/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router";
@@ -46,6 +50,7 @@ import { DateTime } from "../utils/luxon";
 import { updateRoutesWithTimestamp } from "../utils/setupDb";
 import useToast from "../hooks/useToast.hook";
 import { RazorpayOrderOptions, useRazorpay } from "react-razorpay";
+import { updateBalance } from "../features/authentication/authenticationSlice";
 
 export interface IDailyPass {
   id: string;
@@ -64,6 +69,9 @@ const DailyPass = () => {
   const { presentToast } = useToast();
   const uid = useAppSelector((state) => state.AuthenticationState.uid);
   const { error, isLoading, Razorpay: rzpay } = useRazorpay();
+  const wallet = useAppSelector((state) => state.AuthenticationState.wallet);
+  const dispatch = useAppDispatch();
+  const [selectedPayment, setSelectedPayment] = useState<string>();
 
   const setPassDetails = (value: string) => {
     setselectedPass(value);
@@ -195,7 +203,38 @@ const DailyPass = () => {
       presentToast("Payment failed! Please try again.", "danger");
     }
   };
+  const paywithWallet = async () => {
+    console.log("add pass");
+    try {
+      if (Cost && Cost < wallet) {
+        const docRef = doc(fireStore, "users", uid);
+        await updateDoc(docRef, { wallet: wallet - Cost });
+        dispatch(updateBalance(wallet - Cost));
+        const passCollectionPayload: IDailyPass = {
+          id: uid,
+          type: (selectedPass && selectedPass) || "",
+          cost: Cost || 0,
+          timestamp: Timestamp.now(),
+          orderId: `order_${DateTime.now().toISO()}`,
+          paymentId: `payment_${DateTime.now().toISO()}`,
+          signature: `signature_${DateTime.now().toISO()}`,
+        };
 
+        await addDoc(
+          collection(fireStore, "dailypasses"),
+          passCollectionPayload
+        );
+        console.log("Added the pass!");
+        setPassDetails("");
+        presentToast("Daily Pass Purchase success!", "success");
+      } else {
+        presentToast("Insufficient balance in wallet!", "warning");
+      }
+    } catch (error) {
+      console.log("Add pass error:", error);
+      presentToast("Payment failed! Please try again.", "danger");
+    }
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -273,29 +312,57 @@ const DailyPass = () => {
             />
           </IonItem>
           {Cost && selectedPass && (
-            <IonItem
-              className="ion-margin-top"
-              style={{
-                borderRadius: "10px",
-              }}
-            >
-              <IonLabel>
-                <h4>Amout Payable</h4>
-                <p>
-                  Pass type: <strong>{selectedPass}</strong>
-                </p>
-              </IonLabel>
-              <IonLabel slot="end">
-                <h3>₹ {Cost}</h3>
-              </IonLabel>
-            </IonItem>
+            <>
+              <IonItem
+                className="ion-margin-top"
+                style={{
+                  borderRadius: "10px",
+                }}
+              >
+                <IonLabel>
+                  <h4>Amout Payable</h4>
+                  <p>
+                    Pass type: <strong>{selectedPass}</strong>
+                  </p>
+                </IonLabel>
+                <IonLabel slot="end">
+                  <h3>₹ {Cost}</h3>
+                </IonLabel>
+              </IonItem>
+              {/* payment options */}
+              <IonList>
+                <IonRadioGroup
+                  value={selectedPayment}
+                  onIonChange={(e) => setSelectedPayment(e.detail.value)}
+                >
+                  <IonItem>
+                    <IonIcon src={cardOutline} />
+                    <IonLabel>Pay with Razorpay</IonLabel>
+                    <IonRadio slot="end" value="razorpay" />
+                  </IonItem>
+
+                  <IonItem>
+                    <IonIcon src={walletOutline} />
+                    <IonLabel>Pay with Wallet</IonLabel>
+                    <IonLabel slot="end">₹{wallet}</IonLabel>
+                    <IonRadio slot="end" value="wallet" />
+                  </IonItem>
+                </IonRadioGroup>
+              </IonList>
+            </>
           )}
 
           <IonButton
             className="ion-margin-top"
             expand="block"
             size="large"
-            onClick={handlePayment}
+            onClick={() => {
+              if (selectedPayment === "razorpay") {
+                handlePayment();
+              } else {
+                paywithWallet();
+              }
+            }}
           >
             Pay Now
           </IonButton>

@@ -8,6 +8,8 @@ import {
   IonLabel,
   IonList,
   IonModal,
+  IonRadio,
+  IonRadioGroup,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
@@ -18,19 +20,29 @@ import {
   arrowForward,
   arrowUp,
   bus,
+  cardOutline,
   ellipsisVerticalCircleOutline,
   ellipsisVerticalOutline,
   gitCommitOutline,
   listCircle,
   stopCircle,
+  walletOutline,
 } from "ionicons/icons";
 import React, { useEffect, useState } from "react";
 import { IBusData } from "../pages/BuyTickets";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import useToast from "../hooks/useToast.hook";
-import { useAppSelector } from "../app/hooks";
-import { addDoc, collection, Timestamp } from "firebase/firestore";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {
+  addDoc,
+  collection,
+  doc,
+  Timestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { fireStore } from "../services/firebaseClient";
+import { DateTime } from "../utils/luxon";
+import { updateBalance } from "../features/authentication/authenticationSlice";
 
 export type PaymentType = {
   isOpen?: boolean;
@@ -63,6 +75,9 @@ const PaymentDetails = ({
   const { error, isLoading, Razorpay: rzpay } = useRazorpay();
   const { presentToast } = useToast();
   const uid = useAppSelector((state) => state.AuthenticationState.uid);
+  const wallet = useAppSelector((state) => state.AuthenticationState.wallet);
+  const dispatch = useAppDispatch();
+  const [selectedPayment, setSelectedPayment] = useState<string>();
 
   const getCost = () => {
     if (busData) {
@@ -190,6 +205,35 @@ const PaymentDetails = ({
       presentToast("Ticket Purchase success!", "success");
       await addDoc(collection(fireStore, "tickets"), ticketCollectionPayload);
       console.log("Added the tickets!");
+    } catch (error) {
+      console.log("Add tickets error:", error);
+      presentToast("Payment failed! Please try again.", "danger");
+    }
+  };
+  const paywithWallet = async () => {
+    console.log("add ticket");
+    try {
+      if (Cost && Cost < wallet) {
+        const docRef = doc(fireStore, "users", uid);
+        await updateDoc(docRef, { wallet: wallet - Cost });
+        dispatch(updateBalance(wallet - Cost));
+        const ticketCollectionPayload: ITicket = {
+          id: uid,
+          source,
+          destination,
+          cost: Cost || 0,
+          timestamp: (busData && busData.timestamp) || Timestamp.now(),
+          orderId: `order_${DateTime.now().toISO()}`,
+          paymentId: `payment_${DateTime.now().toISO()}`,
+          signature: `signature_${DateTime.now().toISO()}`,
+        };
+        presentToast("Ticket Purchase success!", "success");
+        await addDoc(collection(fireStore, "tickets"), ticketCollectionPayload);
+        console.log("Added the tickets!");
+        if (setIsOpen) setIsOpen(false);
+      } else {
+        presentToast("Insufficient balance in wallet!", "warning");
+      }
     } catch (error) {
       console.log("Add tickets error:", error);
       presentToast("Payment failed! Please try again.", "danger");
@@ -340,11 +384,37 @@ const PaymentDetails = ({
               <h3>Journey ends</h3>
             </IonLabel>
           </IonItem>
+          {/* payment options */}
+          <IonList>
+            <IonRadioGroup
+              value={selectedPayment}
+              onIonChange={(e) => setSelectedPayment(e.detail.value)}
+            >
+              <IonItem>
+                <IonIcon src={cardOutline} />
+                <IonLabel>Pay with Razorpay</IonLabel>
+                <IonRadio slot="end" value="razorpay" />
+              </IonItem>
+
+              <IonItem>
+                <IonIcon src={walletOutline} />
+                <IonLabel>Pay with Wallet</IonLabel>
+                <IonLabel slot="end">₹{wallet}</IonLabel>
+                <IonRadio slot="end" value="wallet" />
+              </IonItem>
+            </IonRadioGroup>
+          </IonList>
           <IonButton
             className="ion-margin-top"
             expand="block"
             size="large"
-            onClick={handlePayment}
+            onClick={() => {
+              if (selectedPayment === "razorpay") {
+                handlePayment();
+              } else {
+                paywithWallet();
+              }
+            }}
             // onClick={pushTicketDetails2}
           >
             Purchase Ticket (₹{Cost})
