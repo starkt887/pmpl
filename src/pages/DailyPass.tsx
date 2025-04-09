@@ -110,7 +110,7 @@ const DailyPass = () => {
           key: "rzp_test_NxAV4QBfEPwxiL",
           amount: Cost, // Amount in paise
           currency: "INR",
-          name: "PMPL Bookings",
+          name: "Bus Bookings",
           description: "Daily Pass/Pass Booking",
           order_id: responseData.orderId, // Generate order_id on server
           handler: async (response) => {

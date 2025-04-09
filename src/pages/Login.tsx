@@ -32,6 +32,7 @@ import Loader from "../components/Loader";
 import { loadingOff, loadingOn } from "../features/loader/loaderSlice";
 import useToast from "../hooks/useToast.hook";
 import logo from "../images/logo.png";
+import { addCitiesToFirestore, addRouteCombinations } from "../utils/setupDb";
 
 const Login = () => {
   const [Email, setEmail] = useState<string>();
@@ -122,7 +123,7 @@ const Login = () => {
           <div style={{ height: "50%", alignSelf: "center" }}>
             <img src={logo} width={200} />
             <h1 className="ion-text-center">
-              Welcome to <br /> PMPL Booking
+              Welcome to <br /> Bus Route Helper
             </h1>
           </div>
           {isLoading ? (

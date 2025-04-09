@@ -16,8 +16,19 @@ import DailyPass from "./pages/DailyPass";
 import ViewPasses from "./pages/ViewPasses";
 import AllRoutes from "./pages/AllRoutes";
 import Profile from "./pages/Profile";
+import { LocalNotifications } from "@capacitor/local-notifications";
 
 const App = () => {
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const permissionStat = await LocalNotifications.checkPermissions();
+      if (permissionStat.display !== "granted") {
+        await LocalNotifications.requestPermissions();
+      }
+    };
+    checkPermissions();
+  }, []);
+
   const isLoggedin = useAppSelector(
     (state) => state.AuthenticationState.isLoggedin
   );

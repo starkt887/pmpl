@@ -68,7 +68,7 @@ const WalletModal = ({ isOpen, onClose, initialBalance }: WalletModalProps) => {
           key: "rzp_test_NxAV4QBfEPwxiL",
           amount: amountToAdd, // Amount in paise
           currency: "INR",
-          name: "PMPL Bookings",
+          name: "Bus Bookings",
           description: "Ticket/Pass Booking",
           order_id: responseData.orderId, // Generate order_id on server
           handler: async (response) => {

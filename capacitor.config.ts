@@ -1,17 +1,17 @@
 import type { CapacitorConfig } from "@capacitor/cli";
-import { Capacitor } from '@capacitor/core';
-import { StatusBar } from '@capacitor/status-bar';
+import { Capacitor } from "@capacitor/core";
+import { StatusBar } from "@capacitor/status-bar";
 
 const config: CapacitorConfig = {
   appId: "com.ajskland.pmpl",
-  appName: "PMPL-Booking",
+  appName: "Bus Route helper",
   webDir: "build",
-  // plugins: {
-  //   CapacitorHttp: {
-  //     enabled: true,
-  //   },
-  // },
-  
+  plugins: {
+    // CapacitorHttp: {
+    //   enabled: true,
+    // },
+    LocalNotifications: {},
+  },
 };
 
 if (Capacitor.isNativePlatform()) {

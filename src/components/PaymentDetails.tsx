@@ -20,11 +20,13 @@ import {
   arrowForward,
   arrowUp,
   bus,
+  card,
   cardOutline,
   ellipsisVerticalCircleOutline,
   ellipsisVerticalOutline,
   gitCommitOutline,
   listCircle,
+  maleFemale,
   stopCircle,
   walletOutline,
 } from "ionicons/icons";
@@ -77,7 +79,16 @@ const PaymentDetails = ({
   const uid = useAppSelector((state) => state.AuthenticationState.uid);
   const wallet = useAppSelector((state) => state.AuthenticationState.wallet);
   const dispatch = useAppDispatch();
-  const [selectedPayment, setSelectedPayment] = useState<string>();
+  const [selectedPayment, setSelectedPayment] = useState<string>("razorpay");
+  const [Gender, setGender] = useState<string>("male");
+
+  useEffect(() => {
+    if (Gender === "female") {
+      setCost((prev) => prev && prev / 2);
+    } else {
+      setCost((prev) => prev && prev * 2);
+    }
+  }, [Gender]);
 
   const getCost = () => {
     if (busData) {
@@ -117,7 +128,7 @@ const PaymentDetails = ({
           key: "rzp_test_NxAV4QBfEPwxiL",
           amount: Cost, // Amount in paise
           currency: "INR",
-          name: "PMPL Bookings",
+          name: "Bus Bookings",
           description: "Ticket/Pass Booking",
           order_id: responseData.orderId, // Generate order_id on server
           handler: async (response) => {
@@ -384,8 +395,61 @@ const PaymentDetails = ({
               <h3>Journey ends</h3>
             </IonLabel>
           </IonItem>
+
+          {/* Gender options */}
+
+          <IonList>
+            <IonItem
+              color="tertiary"
+              className="ion-margin-top"
+              style={{
+                borderRadius:"10px"
+              }}
+            >
+              <IonIcon
+                size="large"
+                src={maleFemale}
+                className="ion-padding-end"
+              />
+              <IonLabel class="ion-no-margin">
+                <h3>Select Gender</h3>
+              </IonLabel>
+            </IonItem>
+            <IonRadioGroup
+              value={Gender}
+              onIonChange={(e) => setGender(e.detail.value)}
+            >
+              <IonItem>
+                <IonIcon src={cardOutline} />
+                <IonLabel>Male</IonLabel>
+                <IonRadio slot="end" value="male" />
+              </IonItem>
+
+              <IonItem>
+                <IonIcon src={walletOutline} />
+                <IonLabel>Female</IonLabel>
+                <IonRadio slot="end" value="female" />
+              </IonItem>
+            </IonRadioGroup>
+          </IonList>
           {/* payment options */}
           <IonList>
+          <IonItem
+              color="tertiary"
+              className="ion-margin-top"
+              style={{
+                borderRadius:"10px"
+              }}
+            >
+              <IonIcon
+                size="large"
+                src={card}
+                className="ion-padding-end"
+              />
+              <IonLabel class="ion-no-margin">
+                <h3>Pay using</h3>
+              </IonLabel>
+            </IonItem>
             <IonRadioGroup
               value={selectedPayment}
               onIonChange={(e) => setSelectedPayment(e.detail.value)}

@@ -69,6 +69,8 @@ const routes = [
     totalDistance: 150,
     farePerKm: 2,
     baseFare: 50,
+    // timestamp:"timestamp in iso format",
+    // stopNames:[<array of stopnames from stops array>]
   },
   {
     id: "route_002",
@@ -209,45 +211,57 @@ const addRoutesToFirestore = async () => {
   }
 };
 const cities = [
-  { city: "Mumbai" },
-  { city: "Pune" },
-  { city: "Delhi" },
-  { city: "Chandigarh" },
-  { city: "Bangalore" },
-  { city: "Mysore" },
-  { city: "Hyderabad" },
-  { city: "Vijayawada" },
-  { city: "Chennai" },
-  { city: "Coimbatore" },
-  { city: "Kolkata" },
-  { city: "Durgapur" },
-  { city: "Ahmedabad" },
-  { city: "Surat" },
-  { city: "Jaipur" },
-  { city: "Udaipur" },
-  { city: "Lucknow" },
-  { city: "Varanasi" },
-  { city: "Goa" },
-  { city: "Thane" },
-  { city: "Lonavala" },
-  { city: "Panipat" },
-  { city: "Ambala" },
-  { city: "Ramanagara" },
-  { city: "Mandya" },
-  { city: "Nalgonda" },
-  { city: "Guntur" },
-  { city: "Vellore" },
-  { city: "Salem" },
-  { city: "Bardhaman" },
-  { city: "Asansol" },
-  { city: "Vadodara" },
-  { city: "Bharuch" },
-  { city: "Ajmer" },
-  { city: "Chittorgarh" },
-  { city: "Faizabad" },
-  { city: "Prayagraj" },
-  { city: "Satara" },
-  { city: "Belgaum" },
+  // { city: "Mumbai" },
+  // { city: "Pune" },
+  // { city: "Delhi" },
+  // { city: "Chandigarh" },
+  // { city: "Bangalore" },
+  // { city: "Mysore" },
+  // { city: "Hyderabad" },
+  // { city: "Vijayawada" },
+  // { city: "Chennai" },
+  // { city: "Coimbatore" },
+  // { city: "Kolkata" },
+  // { city: "Durgapur" },
+  // { city: "Ahmedabad" },
+  // { city: "Surat" },
+  // { city: "Jaipur" },
+  // { city: "Udaipur" },
+  // { city: "Lucknow" },
+  // { city: "Varanasi" },
+  // { city: "Goa" },
+  // { city: "Thane" },
+  // { city: "Lonavala" },
+  // { city: "Panipat" },
+  // { city: "Ambala" },
+  // { city: "Ramanagara" },
+  // { city: "Mandya" },
+  // { city: "Nalgonda" },
+  // { city: "Guntur" },
+  // { city: "Vellore" },
+  // { city: "Salem" },
+  // { city: "Bardhaman" },
+  // { city: "Asansol" },
+  // { city: "Vadodara" },
+  // { city: "Bharuch" },
+  // { city: "Ajmer" },
+  // { city: "Chittorgarh" },
+  // { city: "Faizabad" },
+  // { city: "Prayagraj" },
+  // { city: "Satara" },
+  // { city: "Belgaum" },
+
+  { city: "Hadapsar Gadital" },
+  { city: "Swargate" },
+  { city: "Ma Na Pa" },
+  { city: "Pune Station" },
+  { city: "Katraj" },
+  { city: "Shivajinagar" },
+  { city: "Deccan" },
+  { city: "Marketyard" },
+  { city: "Pimple Gurav" },
+  { city: "Wagholi" },
+  { city: "Baner" },
 ];
 
 const addCitiesToFirestore = async () => {
@@ -302,7 +316,7 @@ const updateRoutesFormat = async () => {
 };
 const updateRoutesWithTimestamp = async () => {
   console.log("updating routes with timestamp");
-  
+
   const routesCollection = collection(fireStore, "routes");
 
   try {
@@ -329,10 +343,100 @@ const updateRoutesWithTimestamp = async () => {
   }
 };
 
+const stops = [
+  { name: "Hadapsar Gadital", lat: 18.5089, lng: 73.9259 },
+  { name: "Swargate", lat: 18.5018, lng: 73.8636 },
+  { name: "Ma Na Pa", lat: 18.5196, lng: 73.8553 },
+  { name: "Pune Station", lat: 18.5287, lng: 73.8746 },
+  { name: "Katraj", lat: 18.4467, lng: 73.8651 },
+  { name: "Shivajinagar", lat: 18.5309, lng: 73.8475 },
+  { name: "Deccan", lat: 18.5167, lng: 73.8418 },
+  { name: "Marketyard", lat: 18.4783, lng: 73.8775 },
+  { name: "Pimple Gurav", lat: 18.5985, lng: 73.8228 },
+  { name: "Wagholi", lat: 18.5806, lng: 73.9855 },
+  { name: "Baner", lat: 18.559, lng: 73.7862 },
+];
+
+const farePerKm = 1.79;
+const baseFare = 20;
+
+function getRandomBusNumber() {
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return `MH-12-${num}`;
+}
+
+// Approximate km between each stop
+const approxDistancePerStop = 5;
+
+const addRouteCombinations = async () => {
+  const db = fireStore;
+  const routesRef = collection(db, "routes");
+
+  let routeCounter = 1;
+
+  for (let i = 0; i < stops.length - 3; i++) {
+    for (let j = i + 3; j < stops.length; j++) {
+      const start = stops[i];
+      const end = stops[j];
+      const viaStops = stops.slice(i + 1, j);
+
+      const allStops = [start, ...viaStops, end].map((stop, index) => ({
+        ...stop,
+        distanceFromStart: index * approxDistancePerStop,
+      }));
+
+      const totalDistance = (allStops.length - 1) * approxDistancePerStop;
+
+      const route = {
+        id: `route_${routeCounter.toString().padStart(3, "0")}`,
+        busNumber: getRandomBusNumber(),
+        startLocation: start.name,
+        endLocation: end.name,
+        stops: allStops,
+        totalDistance,
+        farePerKm,
+        baseFare,
+        timestamp: Timestamp.now(),
+        stopNames: allStops.map((s) => s.name),
+      };
+
+      try {
+        await addDoc(routesRef, route);
+        console.log(`Route added: ${route.id} - ${start.name} to ${end.name}`);
+        routeCounter++;
+      } catch (error) {
+        console.error("Error adding route:", error);
+      }
+    }
+  }
+};
+const updateRouteTimestamps = async () => {
+  const db = fireStore;
+  const routesRef = collection(db, "routes");
+
+  try {
+    const snapshot = await getDocs(routesRef);
+
+    const updatePromises = snapshot.docs.map((routeDoc) => {
+      const docRef = doc(db, "routes", routeDoc.id);
+      return updateDoc(docRef, {
+        timestamp: Timestamp.now(),
+      });
+    });
+
+    await Promise.all(updatePromises);
+    console.log("All route documents updated with Firebase Timestamp.");
+  } catch (error) {
+    console.error("Error updating route timestamps:", error);
+  }
+};
+
 export {
   addRoutesToFirestore,
   addBusesToFirestore,
   addCitiesToFirestore,
   updateRoutesFormat,
   updateRoutesWithTimestamp,
+  addRouteCombinations,
+  updateRouteTimestamps
 };

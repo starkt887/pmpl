@@ -31,6 +31,8 @@ import useData from "../hooks/useData.hook";
 import { ITicket } from "../components/PaymentDetails";
 import { IDailyPass } from "./DailyPass";
 import { DateTime } from "../utils/luxon";
+import { showLocalNotifications } from "../utils/notification";
+import { addCitiesToFirestore, addRouteCombinations, updateRouteTimestamps } from "../utils/setupDb";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -43,6 +45,23 @@ const Home: React.FC = () => {
     setrecentTickets(tickets);
     const passes = await getRecentPasses();
     setrecentPasses(passes);
+    passes.forEach((pass) => {
+      const timediff = Math.round(
+        DateTime.now().diff(DateTime.fromMillis(pass.timestamp.toMillis()), [
+          "days",
+        ]).days
+      );
+      console.log(timediff);
+      if (timediff > 1) {
+        showLocalNotifications(
+          `${pass.type} is expired`,
+          `${pass.type} bought on ${DateTime.fromJSDate(
+            pass.timestamp.toDate()
+          ).toISO(DateTime.DATETIME_MED)} is expired`,
+          `Bus Route helper`
+        );
+      }
+    });
   };
 
   useEffect(() => {
@@ -58,7 +77,7 @@ const Home: React.FC = () => {
             </IonButton>
           </IonButtons>
 
-          <IonText className="app-title">PMPL Route helper</IonText>
+          <IonText className="app-title">Bus Route helper</IonText>
           <IonButtons slot="end">
             {/* <IonButton slot="icon-only" fill="solid">
               <IonIcon icon={person} />
@@ -76,6 +95,9 @@ const Home: React.FC = () => {
       </IonHeader>
 
       <IonContent>
+      {/* <IonButton onClick={() => addRouteCombinations()}>Add route combinations</IonButton>
+      <IonButton onClick={() => addCitiesToFirestore()}>Add cities</IonButton>
+      <IonButton onClick={() => updateRouteTimestamps()}>Update Route Timestamps</IonButton> */}
         <IonSearchbar
           placeholder="Where to?"
           onClick={() => history.push("/buytickets")}
@@ -202,9 +224,9 @@ const Home: React.FC = () => {
 
                     <IonLabel>
                       <h3>{pass.type}</h3>
-                      {`${DateTime.fromJSDate(
-                        pass.timestamp.toDate()
-                      ).toFormat("MMMM dd, yyyy hh:mm")}`}
+                      {`${DateTime.fromJSDate(pass.timestamp.toDate()).toFormat(
+                        "MMMM dd, yyyy hh:mm"
+                      )}`}
                     </IonLabel>
                     <IonLabel slot="end">
                       <h4>₹ {pass.cost}</h4>

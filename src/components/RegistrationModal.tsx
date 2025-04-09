@@ -30,7 +30,6 @@ type RegisterProps = {
 };
 
 const RegistrationModal = ({ isOpen, setIsOpen }: RegisterProps) => {
-
   const [Name, setName] = useState<string>("");
   const [Email, setEmail] = useState<string>("");
   const [Password, setPassword] = useState<string>("");
@@ -41,13 +40,9 @@ const RegistrationModal = ({ isOpen, setIsOpen }: RegisterProps) => {
   const { presentToast } = useToast();
 
   const validateFields = () => {
- 
-    const isFilled = [
-      Name,
-      Email,
-      Password,
-      ConfirmPassword,
-    ].every((input) => input !== "");
+    const isFilled = [Name, Email, Password, ConfirmPassword].every(
+      (input) => input !== ""
+    );
     if (!isFilled) {
       presentToast("Please enter all fields!", "danger");
       return false;
@@ -60,7 +55,6 @@ const RegistrationModal = ({ isOpen, setIsOpen }: RegisterProps) => {
       presentToast("Passwords doesn't match!", "danger");
       return false;
     }
-
 
     return true;
   };
@@ -89,6 +83,7 @@ const RegistrationModal = ({ isOpen, setIsOpen }: RegisterProps) => {
             email: Email,
             name: Name,
             unlock_phrase: UnloackPhrase,
+            wallet: 0,
           });
           localStorage.setItem("unlock_phrase", UnloackPhrase);
           dispatch(loadingOff());
@@ -172,7 +167,6 @@ const RegistrationModal = ({ isOpen, setIsOpen }: RegisterProps) => {
                   {" "}
                 </IonInput>
               </IonItem>
-          
 
               <IonButton
                 className="btnlogin"
