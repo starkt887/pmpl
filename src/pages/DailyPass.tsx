@@ -88,6 +88,9 @@ const DailyPass = () => {
       case "All Routes":
         setCost(120);
         break;
+      case "Pune Darshan":
+        setCost(420);
+        break;
     }
   };
   const handlePayment = async () => {
@@ -291,6 +294,10 @@ const DailyPass = () => {
               <IonItem>
                 <IonLabel>All Routes - ₹ 120</IonLabel>
                 <IonRadio slot="start" value={"All Routes"} />
+              </IonItem>
+              <IonItem>
+                <IonLabel>Pune Darshan - ₹ 420</IonLabel>
+                <IonRadio slot="start" value={"Pune Darshan"} />
               </IonItem>
             </IonItemGroup>
           </IonRadioGroup>
