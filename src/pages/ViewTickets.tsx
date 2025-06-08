@@ -1,6 +1,7 @@
 import {
   IonButton,
   IonButtons,
+  IonChip,
   IonContent,
   IonHeader,
   IonIcon,
@@ -40,7 +41,14 @@ const ViewTickets = () => {
   useEffect(() => {
     getTickets();
   }, []);
-
+  const isExpired = (datetime: DateTime) => {
+    console.log();
+    
+    if (DateTime.now().diff(datetime, ["hours"]).hours>1) {
+      return<IonChip color="danger">Expired</IonChip>
+    }
+    return <IonChip color="success">Valid</IonChip>
+  };
   return (
     <IonPage>
       <IonHeader>
@@ -76,6 +84,7 @@ const ViewTickets = () => {
                   </IonLabel>
                   <IonLabel slot="end">
                     <h4>₹ {ticket.cost}</h4>
+                    {isExpired(DateTime.fromJSDate(ticket.timestamp.toDate()))}
                   </IonLabel>
                 </IonItem>
               );

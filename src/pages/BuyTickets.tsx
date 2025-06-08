@@ -146,7 +146,7 @@ const BuyTickets = () => {
     const q1 = query(
       collection(fireStore, "routes"),
       where("startLocation", "==", source),
-      where("endLocation", "==", destination),
+      where("endLocation", "==", destination)
       // where("timestamp", ">", Timestamp.now())
     );
 
@@ -158,7 +158,7 @@ const BuyTickets = () => {
     const q2 = query(
       collection(fireStore, "routes"),
       where("startLocation", "==", source),
-      where("stopNames", "array-contains", destination),
+      where("stopNames", "array-contains", destination)
       // where("timestamp", ">", Timestamp.now())
     );
 
@@ -170,7 +170,7 @@ const BuyTickets = () => {
     const q3 = query(
       collection(fireStore, "routes"),
       where("stopNames", "array-contains", source),
-      where("endLocation", "==", destination),
+      where("endLocation", "==", destination)
       // where("timestamp", ">", Timestamp.now())
     );
 
@@ -215,7 +215,9 @@ const BuyTickets = () => {
         <IonSearchbar
           showClearButton="focus"
           placeholder="Enter source"
-          onIonInput={(e) => handleSourceChange(e.detail.value!.toLocaleLowerCase())}
+          onIonInput={(e) =>
+            handleSourceChange(e.detail.value!.toLocaleLowerCase())
+          }
           debounce={500}
           value={source}
         ></IonSearchbar>
@@ -230,7 +232,9 @@ const BuyTickets = () => {
         <IonSearchbar
           showClearButton="focus"
           placeholder="Enter destination"
-          onIonInput={(e) => handleDestinationChange(e.detail.value!.toLocaleLowerCase())}
+          onIonInput={(e) =>
+            handleDestinationChange(e.detail.value!.toLocaleLowerCase())
+          }
           debounce={500}
           value={destination}
         ></IonSearchbar>
@@ -262,7 +266,9 @@ const BuyTickets = () => {
                     <h3>
                       {busData.startLocation} - {busData.endLocation}
                     </h3>
-                    {`${DateTime.fromJSDate(busData.timestamp.toDate()).toFormat("MMMM dd, yyyy hh:mm")}`}
+                    {/* {`${DateTime.fromJSDate(busData.timestamp.toDate()).toFormat("MMMM dd, yyyy hh:mm")}`} */}
+                    {`${DateTime.now()
+                    .toFormat("MMMM dd, yyyy")} ${DateTime.now().plus({hours:Math.random()*10}).toFormat("hh:mm")}`}
                   </IonLabel>
                   <IonIcon
                     slot="end"
